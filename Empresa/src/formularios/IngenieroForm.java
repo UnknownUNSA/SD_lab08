@@ -3,8 +3,16 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package formularios;
+
 import empresa.Conector;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -14,6 +22,8 @@ public class IngenieroForm extends javax.swing.JFrame {
 
     private final Conector conector;
     private final Connection conn;
+    private DefaultTableModel model;
+
     /**
      * Creates new form IngenieroForm
      */
@@ -25,6 +35,41 @@ public class IngenieroForm extends javax.swing.JFrame {
             System.out.println("Conexión establecida correctamente.");
         } else {
             System.out.println("Error al conectar a la base de datos.");
+        }
+        listar();
+        TablaDatos.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            int filaSeleccionada = TablaDatos.getSelectedRow();
+            if (filaSeleccionada >= 0) {
+                DefaultTableModel model = (DefaultTableModel) TablaDatos.getModel();
+                jTextField1.setText(model.getValueAt(filaSeleccionada, 0).toString()); // ID
+                jTextField2.setText(model.getValueAt(filaSeleccionada, 1).toString()); // Especialidad
+                jTextField3.setText(model.getValueAt(filaSeleccionada, 2).toString()); // Cargo
+            }
+        }
+    });
+    }
+    
+    
+
+    private void listar() {
+        String sql = "select * from Ingenieros";
+        try {
+            PreparedStatement pst = conn.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            model = (DefaultTableModel) TablaDatos.getModel();
+            model.setRowCount(0);
+            while (rs.next()) {
+                Object[] row = {
+                    rs.getInt("IDIng"),
+                    rs.getString("Especialidad"),
+                    rs.getString("Cargo")
+                };
+                model.addRow(row);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al listar los datos: " + e.getMessage());
         }
     }
 
@@ -44,11 +89,10 @@ public class IngenieroForm extends javax.swing.JFrame {
         jTextField2 = new javax.swing.JTextField();
         jTextField3 = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        TablaDatos = new javax.swing.JTable();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTextPane1 = new javax.swing.JTextPane();
 
@@ -85,13 +129,21 @@ public class IngenieroForm extends javax.swing.JFrame {
             }
         });
 
-        jButton2.setText("Guardar");
-
         jButton3.setText("Eliminar");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         jButton4.setText("Actualizar");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        TablaDatos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null},
                 {null, null, null},
@@ -110,11 +162,11 @@ public class IngenieroForm extends javax.swing.JFrame {
                 return types [columnIndex];
             }
         });
-        jScrollPane1.setViewportView(jTable1);
-        if (jTable1.getColumnModel().getColumnCount() > 0) {
-            jTable1.getColumnModel().getColumn(0).setHeaderValue("Id");
-            jTable1.getColumnModel().getColumn(1).setHeaderValue("Especialidad");
-            jTable1.getColumnModel().getColumn(2).setHeaderValue("Cargo");
+        jScrollPane1.setViewportView(TablaDatos);
+        if (TablaDatos.getColumnModel().getColumnCount() > 0) {
+            TablaDatos.getColumnModel().getColumn(0).setHeaderValue("Id");
+            TablaDatos.getColumnModel().getColumn(1).setHeaderValue("Especialidad");
+            TablaDatos.getColumnModel().getColumn(2).setHeaderValue("Cargo");
         }
 
         jTextPane1.setBackground(new java.awt.Color(0, 0, 0));
@@ -144,16 +196,16 @@ public class IngenieroForm extends javax.swing.JFrame {
                                 .addGap(26, 26, 26)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING))
+                                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE))))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 321, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButton1)
-                        .addGap(264, 264, 264)
+                        .addGap(18, 18, 18)
                         .addComponent(jButton3)
-                        .addGap(82, 82, 82)
-                        .addComponent(jButton4)))
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton4)
+                        .addGap(310, 310, 310)))
                 .addContainerGap(12, Short.MAX_VALUE))
             .addComponent(jScrollPane2)
         );
@@ -178,12 +230,10 @@ public class IngenieroForm extends javax.swing.JFrame {
                             .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jButton2)
-                        .addComponent(jButton1))
-                    .addComponent(jButton4)
-                    .addComponent(jButton3))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(jButton3)
+                    .addComponent(jButton4))
                 .addContainerGap(34, Short.MAX_VALUE))
         );
 
@@ -203,8 +253,96 @@ public class IngenieroForm extends javax.swing.JFrame {
     }//GEN-LAST:event_jTextField3ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        String idIngStr = jTextField1.getText(); // Obtener el ID como cadena
+        String especialidad = jTextField2.getText();
+        String cargo = jTextField3.getText();
+
+        insertarIngeniero(idIngStr, especialidad, cargo);
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void limpiarTexto() {
+        jTextField1.setText(""); // Limpiar el campo de ID
+        jTextField2.setText(""); // Limpiar el campo de especialidad
+        jTextField3.setText(""); // Limpiar el campo de cargo
+    }
+
+    private void insertarIngeniero(String idIngStr, String especialidad, String cargo) {
+        String sql = "INSERT INTO Ingenieros (IDIng, Especialidad, Cargo) VALUES (?, ?, ?)";
+        String sql2 = "INSERT INTO Ingenieros (Especialidad, Cargo) VALUES (?, ?)";
+
+        try {
+            PreparedStatement pst;
+            if (!idIngStr.isEmpty()) { // Verificar si la cadena de ID no está vacía
+                int idIng = Integer.parseInt(idIngStr); // Convertir la cadena de ID a entero
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, idIng);
+                pst.setString(2, especialidad);
+                pst.setString(3, cargo);
+            } else { // Si la cadena de ID está vacía, usar la segunda consulta SQL
+                pst = conn.prepareStatement(sql2);
+                pst.setString(1, especialidad);
+                pst.setString(2, cargo);
+            }
+
+            int resultado = pst.executeUpdate();
+            if (resultado > 0) {
+                JOptionPane.showMessageDialog(null, "Ingeniero insertado correctamente.");
+                listar(); // Actualizar la tabla después de la inserción
+                limpiarTexto();
+            } else {
+                JOptionPane.showMessageDialog(null, "Error al insertar el Ingeniero.");
+            }
+        } catch (NumberFormatException e) { // Capturar excepción si la cadena de ID no es un número válido
+            JOptionPane.showMessageDialog(null, "Error al convertir el ID a entero.");
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al insertar el Ingeniero: " + e.getMessage());
+        }
+    }
+
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        String idIngStr = jTextField1.getText(); // Obtener el ID como cadena
+        int idIng = Integer.parseInt(idIngStr);
+        eliminarIngeniero(idIng);
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void eliminarIngeniero(int id) {
+    String sql = "DELETE FROM Ingenieros WHERE IDIng = ?";
+    try {
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setInt(1, id);
+        pst.executeUpdate();
+        JOptionPane.showMessageDialog(null, "Registro eliminado exitosamente.");
+        limpiarTexto();
+        listar();
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(null, "Error al eliminar el registro: " + e.getMessage());
+    }
+}
+ 
+    
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        int id = Integer.parseInt(jTextField1.getText());
+        String especialidad = jTextField2.getText();
+        String cargo = jTextField3.getText();
+        actualizarIngeniero(id, especialidad, cargo);
+    }//GEN-LAST:event_jButton4ActionPerformed
+    
+    private void actualizarIngeniero(int id, String especialidad, String cargo) {
+    String sql = "UPDATE Ingenieros SET Especialidad = ?, Cargo = ? WHERE IDIng = ?";
+    try {
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setString(1, especialidad);
+        pst.setString(2, cargo);
+        pst.setInt(3, id);
+        pst.executeUpdate();
+        JOptionPane.showMessageDialog(null, "Registro actualizado exitosamente.");
+        limpiarTexto(); // Limpia los campos de texto después de la actualización
+        listar(); // Actualiza la tabla después de la actualización
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(null, "Error al actualizar el registro: " + e.getMessage());
+    }
+}
 
     /**
      * @param args the command line arguments
@@ -240,8 +378,8 @@ public class IngenieroForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTable TablaDatos;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
@@ -249,10 +387,10 @@ public class IngenieroForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable1;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
     private javax.swing.JTextPane jTextPane1;
     // End of variables declaration//GEN-END:variables
+
 }
