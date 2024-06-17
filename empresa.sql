@@ -100,3 +100,21 @@ CALL InsertarIngeniero('Ing. Barto', 'Jefe de Proyecto');
 
 -- Confirmar transacción
 COMMIT;
+
+
+-- Asignar valores y ejecutar la sentencia preparada para insertar un departamento
+SET @nombre_dpto = 'Lima';
+SET @telefono_dpto = '234567890';
+SET @fax_dpto = '876543210';
+EXECUTE stmt_insert_departamento USING @nombre_dpto, @telefono_dpto, @fax_dpto;
+
+-- Asignar valores y ejecutar la sentencia preparada para insertar un proyecto
+SET @nombre_proy = 'Proyecto Lima';
+SET @fec_inicio_proy = '2024-02-01';
+SET @fec_termino_proy = '2024-11-30';
+EXECUTE stmt_insert_proyecto USING @nombre_proy, @fec_inicio_proy, @fec_termino_proy;
+
+-- Asignar valores y ejecutar la sentencia preparada para insertar un ingeniero
+SET @especialidad_ing = 'Ing. Perez';
+SET @cargo_ing = 'Analista';
+EXECUTE stmt_insert_ingeniero USING @especialidad_ing, @cargo_ing;
